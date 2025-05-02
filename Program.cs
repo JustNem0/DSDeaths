@@ -47,7 +47,7 @@ namespace DSDeaths
             new Game("DarkSoulsRemastered", null, new int[] { 0x1C8A530, 0x98 }),
             new Game("Sekiro", null, new int[] { 0x3D5AAC0, 0x90 }),
             new Game("eldenring", null, new int[] { 0x3D5DF38, 0x94 }),
-            new Game("LOP-Win64-Shipping", null, new int[]  { 0x07196928, 0x98, 0x110, 0xEE0, 0xA0, 0xDC8, 0x98 })
+            new Game("LOP-Win64-Shipping", null, new int[] { 0x07196928, 0x98, 0x110, 0xEE0, 0xA0, 0xDC8, 0x98 })
         };
 
         static bool Write(string gameName, int value)
@@ -66,6 +66,16 @@ namespace DSDeaths
             return true;
         }
 
+        static void CreateFileIfNotExist(string gameName)
+        {
+            if (File.Exists(gameName + ".txt"))
+            {
+                return;
+            }
+
+            Write(gameName, 0);
+        }
+
         static bool PeekMemory(IntPtr handle, IntPtr baseAddress, bool isX64, int[] offsets, ref int value)
         {
             long address = baseAddress.ToInt64();
@@ -78,12 +88,13 @@ namespace DSDeaths
                 address += offset;
                 if (!ReadProcessMemory(handle, (IntPtr)address, buffer, 8, ref discard))
                 {
-                    Console.WriteLine("Could not read game memory.");
+                    //Console.WriteLine("Could not read game memory.");
                     return false;
                 }
+
                 address = isX64 ? BitConverter.ToInt64(buffer, 0) : BitConverter.ToInt32(buffer, 0);
             }
-            
+
             value = (int)address;
             return true;
         }
@@ -101,6 +112,7 @@ namespace DSDeaths
 
                 Process proc = processes[0];
                 Console.WriteLine($"[{game.name}] Found process.");
+                CreateFileIfNotExist(game.name);
 
                 IntPtr handle = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_WM_READ, false, proc.Id);
                 IntPtr baseAddress = proc.MainModule.BaseAddress;
@@ -151,7 +163,7 @@ namespace DSDeaths
             Console.WriteLine(" Possible risk of BANS by trying to use with EAC enabled.");
             Console.WriteLine(" USE AT YOUR OWN RISK.");
             Console.WriteLine("-----------------------------------WARNING-----------------------------------\n");
-            Console.WriteLine("GLORY TO UKRAINE!!!!");
+            Console.WriteLine("                             GLORY TO UKRAINE!!!!                            \n");
 
             Directory.SetCurrentDirectory(AppDomain.CurrentDomain.BaseDirectory);
 
